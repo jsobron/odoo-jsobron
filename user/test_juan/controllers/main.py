@@ -9,7 +9,7 @@ from odoo.http import request
 
 class CreditGroupController(http.Controller):
 
-    @http.route('/api/create_credit_group', type='json', auth='public', methods=['POST'])
+    @http.route('/api/create_credit_group', type='json', auth='public')
     def create_credit_group(self,**post):
         response = {}
         try:
@@ -21,7 +21,7 @@ class CreditGroupController(http.Controller):
                 code = credit_group_data.get('codigo')
                 channel_code = credit_group_data.get('canal')
                 credit_limit = credit_group_data.get('credito_global')
-                channel_id = self.env['custom.channels'].search(['name','=','channel_code'])
+                channel_id = self.env['custom.channels'].search(['name','=',channel_code])
                 ch_id = channel_id.id
                 # Crear un nuevo grupo de crédito
                 credit_group = self.env['credit.groups'].create({
@@ -38,3 +38,5 @@ class CreditGroupController(http.Controller):
             response['message'] = str(e)
 
         return response
+    
+    
