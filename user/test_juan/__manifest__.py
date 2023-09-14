@@ -8,7 +8,9 @@
     'category': 'Admin',
     'depends': ['sales_team', 'payment', 'portal', 'utm'],
     'data': [
-        'views/test.xml',   
+        'views/test.xml',  
+        #'views/credit_report_template.xml',  
+        #'views/report_credit_report.xml',  
     ],
     'demo':[],
 

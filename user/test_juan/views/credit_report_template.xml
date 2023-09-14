@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="credit_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-raw="0"/>
+                <t t-raw="0"/>
+                <h2>Informe de Crédito</h2>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Nombre del Grupo</th>
+                            <th>Código del Grupo</th>
+                            <th>Canal de Venta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><t t-esc="o.name"/></td>
+                            <td><t t-esc="o.code"/></td>
+                            <td><t t-esc="o.channel_id"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3>Clientes Asociados</h3>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Número de Documento</th>
+                            <th>Teléfono</th>
+                            <th>Correo Electrónico</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.customers" t-as="customer">
+                            <td><t t-esc="customer.name"/></td>
+                            <td><t t-esc="customer.doc_number"/></td>
+                            <td><t t-esc="customer.phone"/></td>
+                            <td><t t-esc="customer.email"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -27,7 +27,7 @@ class SaleChannel(models.Model):
 
     def write(self,vals):
         # Obtén el usuario actual que realiza el cambio
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         old_name = self.name
         if vals.get('name'):
             current_user = self.env.user
@@ -52,21 +52,28 @@ class SaleOrder(models.Model):
     channel_id = fields.Many2one('custom.sale.channels',string='Canal de Venta',required = True) #Campo relacion con los canales de venta. OBLIGATORIO
     journal_id = fields.Many2one('account.journal', string='Diario de Factura', readonly = True) #Diario de venta
 
-    #Punto 4 Selections
-    credit_status = fields.Selection([
-        ('no_credit_limit', 'Sin límite de crédito'),
-        ('credit_available', 'Crédito Disponible'),
-        ('credit_blocked', 'Crédito Bloqueado'),
-    ], string='Crédito', compute='_compute_credit_status', store=True)
+    # #Punto 4 Selections
+    # credit_status = fields.Selection([
+    #     ('no_credit_limit', 'Sin límite de crédito'),
+    #     ('credit_available', 'Crédito Disponible'),
+    #     ('credit_blocked', 'Crédito Bloqueado'),
+    # ], string='Crédito', compute='_compute_credit_status', store=True)
 
-    def _compute_credit_status(self):
-        for order in self:
-            if order.partner_id and order.channel_id:
-                # Buscar el grupo de crédito para el cliente y canal de venta
-                credit_group = self.env['res.partner'].search([
-                    ('channel_id', '=', order.channel_id.id),
-                    ('partner_ids', 'in', order.partner_id.id),
-                ], limit=1)
+
+
+    # def _compute_credit_status(self):
+    #     import pdb; pdb.set_trace()
+    #     #Buscar el credit de partner
+    #     #Buscar el canal de venta del canal del partner
+
+    #     for order in self:
+    #         if order.credit_status != 'no_credit_limit':
+    #             if order.partner_id and order.channel_id:
+    #                 # Buscar el grupo de crédito para el cliente y canal de venta
+    #                 credit_group = self.env['credit.groups'].search([
+    #                     ('channel_id','=', order.channel_id.id),
+    #                     ],limit=1)
+                    
 
 
     @api.model
@@ -82,14 +89,14 @@ class SaleOrder(models.Model):
 
     @api.model
     def write(self, vals):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         res = super(SaleOrder, self).write(vals)
         if vals.get('channel_id'):
             self.partner_shipping_id = self.channel_id.warehouse_id.partner_id
             self.journal_id = self.channel_id.journal_id.id
 
     def _create_invoices(self):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         invoice_vals = super(SaleOrder, self).create_invoices()
         if self.channel_id:
             invoice_vals['journal_id'] = self.channel_id.journal_id.id
@@ -113,7 +120,7 @@ class CreditGroup(models.Model):
 
     @api.model
     def create(self, vals):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         if vals.get('code').find('026') >= 0 :  #Restriccion 026
             raise ValidationError( 'El código del grupo no puede contener la secuencia "026"')
         
@@ -121,7 +128,7 @@ class CreditGroup(models.Model):
     
 
     def _compute_credit_used(self):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         for group in self : 
             total_credit_used = 0
             #Buscamos las sale_orders en estado sale y no facturadas.
@@ -145,3 +152,41 @@ class ResPartner(models.Model):
     #Nuevos campos
     has_credit = fields.Boolean(string='Tiene control de credito?') #Booleano para saber si tiene contro de credito
     credit_groups = fields.Many2many('credit.groups',string='Grupos de Credito') #Many2many, recibe mas de un grupo de credito
+
+
+
+#Reporte
+
+class CreditReport(models.Model):
+    _name = 'credit.report'
+    _description = 'Reporte de creditos'
+
+
+    name = fields.Char(string='Nombre')
+    code = fields.Char(string='Código')
+    channel_id = fields.Many2one('custom.sale.channels', string='Canal de Venta')
+    customers = fields.One2many('res.partner', 'credit_groups', string='Clientes Asociados')
+
+
+    @api.model
+    def _get_report_values(self, docids, data=None):
+        # Obtén los datos para el informe
+        credit_groups = self.env['credit.groups'].search([])
+        report_data = []
+        for group in credit_groups:
+            group_data = {
+                'name': group.name,
+                'code': group.code,
+                'channel_id': group.channel_id.name,
+                'customers': [],
+            }
+            for customer in group.customer_ids:
+                customer_data = {
+                    'name': customer.name,
+                    'doc_number': customer.doc_number,
+                    'phone': customer.phone,
+                    'email': customer.email,
+                }
+                group_data['customers'].append(customer_data)
+            report_data.append(group_data)
+        return {'report_data': report_data}

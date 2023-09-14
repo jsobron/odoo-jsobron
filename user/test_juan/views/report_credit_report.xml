@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Acción del informe -->
+        <report
+            id="action_credit_report"
+            model="credit.report"
+            string="Informe de Crédito"
+            report_type="qweb-pdf"
+            name="credit_report.credit_report_template"
+            file="credit_report.credit_report_template"
+        />
+        
+        <!-- Menú para acceder al informe -->
+        <menuitem id="menu_credit_report"
+            name="Informes"
+            parent="menu_sales"
+            action="action_credit_report"
+            sequence="5"
+        />
+    </data>
+</odoo>
